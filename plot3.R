@@ -1,0 +1,23 @@
+#read the data
+hpc<-read.table("household_power_consumption.txt", sep=";", header=TRUE, stringsAsFactors = FALSE, na.strings = "?")
+#check the dimenstion and structure of the data
+library(dplyr)
+dim(hpc)
+head(hpc)
+str(hpc)
+#add a new column that merges the Date and Time columns and convert the Date formats and filter the rows for the relevant days
+hpc<-mutate(hpc, complete_time=paste(Date, Time, sep=" "))
+hpc$Date<-as.Date(hpc$Date, format = "%d/%m/%Y")
+hpc$complete_time<-strptime(hpc$complete_time, format = "%d/%m/%Y %H:%M:%S")
+hpc$complete_time<-as.POSIXct(hpc$complete_time, format = "%d/%m/%Y %H:%M:%S")
+hpc_extracted<-filter(hpc, hpc$Date=="2007-02-01"|hpc$Date=="2007-02-02")
+dim(hpc_extracted)
+str(hpc_extracted)
+#plot3
+png("png3.png")
+plot(c(0,3), c(0,3), type="n")
+plot(hpc_extracted$complete_time, hpc_extracted$Sub_metering_1, type= "l", col= "black", xlab= "", ylab="Energy sub metering")
+lines(hpc_extracted$complete_time, hpc_extracted$Sub_metering_2, col= "red")
+lines(hpc_extracted$complete_time, hpc_extracted$Sub_metering_3, col= "blue")
+legend("topright", inset= 0.06, c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), lty= c(1, 1, 1), lwd= c(2, 2, 2), col=c("black", "red", "blue"), cex =0.75, bty = "n")
+dev.off()
